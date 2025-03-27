@@ -8,6 +8,7 @@ service: task-processor
 provider:
   name: aws
   runtime: nodejs20.x
+  region: eu-central-1
 
 functions:
   hello:
