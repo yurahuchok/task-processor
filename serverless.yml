@@ -15,5 +15,5 @@ functions:
     handler: src/handler/health.handler
     events:
       - httpApi:
-          path: /
+          path: /health
           method: get
