@@ -6,10 +6,10 @@ app: task-processor
 service: task-processor
 
 constructs:
-  tasks-q:
+  q-tasks:
     type: queue
-    worker:
-      handler: src/handler/compute.handler
+    worker: consume
+    batchSize: 10
 
 plugins:
   - serverless-offline
@@ -19,6 +19,8 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: eu-central-1
+  environment:
+    QUEUE_URL: ${construct:q-tasks.queueUrl}
 
 functions:
   health:
@@ -27,9 +29,11 @@ functions:
       - httpApi:
           path: /health
           method: get
-  submit:
-    handler: src/handler/submit.handler
+  publish:
+    handler: src/handler/publish.handler
     events:
       - httpApi:
-          path: /submit
+          path: /publish
           method: post
+  consume:
+    handler: src/handler/consume.handler
