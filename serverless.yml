@@ -9,7 +9,9 @@ constructs:
   q-tasks:
     type: queue
     worker: consume
-    batchSize: 10
+    batchSize: 5 # Maximum number of messages that can be processed in a single "receive" call.
+    maxConcurrency: 10 # Maximum number of "consumer" lambdas that can be running at the same time.
+    maxRetries: 3 # Maximum number of "receives". Value of 3 means 1 original receive + 2 retries.
 
 plugins:
   - serverless-offline
@@ -37,3 +39,4 @@ functions:
           method: post
   consume:
     handler: src/handler/consume.handler
+    timeout: 10 # Timeout for the "consumer" lambda. Also used as default visibility timeout for the queue * 6.

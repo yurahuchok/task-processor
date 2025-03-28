@@ -1,22 +1,28 @@
-import { SQSEvent, SQSBatchResponse } from "aws-lambda";
+import { SQSEvent, SQSBatchResponse, SQSBatchItemFailure } from "aws-lambda";
+import { processTask } from "../util/processTask";
+import { ChangeMessageVisibilityCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { getConfig } from "../util/getConfig";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const simulateProcessingForRecords = async () => {
-    const results = await Promise.all(event.Records.map(async (record) => {
-      const processingTime = Math.random() * (800 - 400) + 400;
-      const isSuccess = Math.random() < 0.3;
+  const client = new SQSClient();
+  const config = getConfig();
+  const batchItemFailures: SQSBatchItemFailure[] = [];
 
-      await new Promise((resolve) => setTimeout(resolve, processingTime));
+  await Promise.all(
+    event.Records.map(async (record) => {
+      try {
+        await processTask(record);
+      } catch (error) {
+        batchItemFailures.push({ itemIdentifier: record.messageId });
 
-      return { messageId: record.messageId, isSuccess };
-    }));
+        await client.send(new ChangeMessageVisibilityCommand({
+          QueueUrl: config.QUEUE_URL,
+          ReceiptHandle: record.receiptHandle,
+          VisibilityTimeout: Math.pow(2, parseInt(record.attributes.ApproximateReceiveCount)),
+        }));
+      }
+    })
+  );
 
-    return results;
-  };
-
-  const results = await simulateProcessingForRecords();
-
-  return {
-    batchItemFailures: results.filter(result => !result.isSuccess).map((result) => ({ itemIdentifier: result.messageId })),
-  };
+  return { batchItemFailures };
 }

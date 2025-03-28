@@ -2,26 +2,12 @@ import { PublishRequest } from "../request/PublishRequest";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { getValidatedInput } from "../util/getValidatedInput";
 import { ZodError } from "zod";
-import { ChangeMessageVisibilityCommand, SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { getConfig } from "../util/getConfig";
 
 export async function handler(event: APIGatewayProxyEventV2) {
   try {
     const input = getValidatedInput(event, PublishRequest);
     const config = getConfig();
-
-    const client = new SQSClient();
-
-    client.send(new ChangeMessageVisibilityCommand({
-      QueueUrl: config.QUEUE_URL,
-      ReceiptHandle: "123",
-      VisibilityTimeout: 0,
-    }));
-
-    await client.send(new SendMessageCommand({
-      QueueUrl: config.QUEUE_URL,
-      MessageBody: JSON.stringify(input),
-    }));
 
     return {
       statusCode: 200,
