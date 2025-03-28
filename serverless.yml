@@ -5,8 +5,15 @@ app: task-processor
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: task-processor
 
+constructs:
+  tasks-q:
+    type: queue
+    worker:
+      handler: src/handler/compute.handler
+
 plugins:
   - serverless-offline
+  - serverless-lift
 
 provider:
   name: aws
@@ -20,3 +27,9 @@ functions:
       - httpApi:
           path: /health
           method: get
+  submit:
+    handler: src/handler/submit.handler
+    events:
+      - httpApi:
+          path: /submit
+          method: post
