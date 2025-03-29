@@ -17,7 +17,7 @@ export async function processRecord(record: SQSRecord) {
       TableName: config.TABLE_NAME,
       Item: {
         PK: { S: task.id },
-        SK: { S: "processed" },
+        SK: { S: "SUCCESS" },
         payload: { S: JSON.stringify(task.payload) },
       },
       ConditionExpression: "attribute_not_exists(PK)",
