@@ -1,5 +1,5 @@
 import { SQSEvent, SQSBatchResponse, SQSBatchItemFailure } from "aws-lambda";
-import { processTask } from "../util/processTask";
+import { processRecord } from "../util/processRecord";
 import { ChangeMessageVisibilityCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { getConfig } from "../util/getConfig";
 
@@ -11,14 +11,14 @@ export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
   await Promise.all(
     event.Records.map(async (record) => {
       try {
-        await processTask(record);
+        await processRecord(record);
       } catch (error) {
         batchItemFailures.push({ itemIdentifier: record.messageId });
 
         await client.send(new ChangeMessageVisibilityCommand({
           QueueUrl: config.QUEUE_URL,
           ReceiptHandle: record.receiptHandle,
-          VisibilityTimeout: Math.pow(2, parseInt(record.attributes.ApproximateReceiveCount)),
+          VisibilityTimeout: 10 + Math.pow(2, parseInt(record.attributes.ApproximateReceiveCount)),
         }));
       }
     })

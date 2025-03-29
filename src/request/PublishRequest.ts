@@ -1,12 +1,8 @@
 import { z } from "zod";
+import { Task } from "../type/Task";
 
 export const PublishRequest = z.object({
-  body: z.string().transform((x) => JSON.parse(x)).pipe(
-    z.object({
-      id: z.string().min(1),
-      payload: z.record(z.string(), z.any()),
-    }),
-  ),
+  body: z.string().transform((x) => JSON.parse(x)).pipe(Task),
 });
 
 export type PublishRequest = z.infer<typeof PublishRequest>;

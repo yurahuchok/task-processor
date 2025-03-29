@@ -12,6 +12,8 @@ constructs:
     batchSize: 5 # Maximum number of messages that can be processed in a single "receive" call.
     maxConcurrency: 10 # Maximum number of "consumer" lambdas that can be running at the same time.
     maxRetries: 3 # Maximum number of "receives". Value of 3 means 1 original receive + 2 retries.
+  table-processed-tasks:
+    type: database/dynamodb-single-table
 
 plugins:
   - serverless-offline
@@ -22,6 +24,7 @@ provider:
   runtime: nodejs20.x
   region: eu-central-1
   environment:
+    TABLE_NAME: ${construct:table-processed-tasks.tableName}
     QUEUE_URL: ${construct:q-tasks.queueUrl}
 
 functions:
