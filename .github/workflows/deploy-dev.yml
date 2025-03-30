@@ -10,7 +10,8 @@ jobs:
     name: deploy
     runs-on: ubuntu-latest
     steps:
-    - uses: ./setup.yml
+    - uses: actions/checkout@v4
+    - uses: ./.github/workflows/setup.yml
     - name: serverless deploy
       run: npm run dev:deploy
       env:
