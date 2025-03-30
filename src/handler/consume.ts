@@ -25,10 +25,7 @@ export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
             ReceiptHandle: record.receiptHandle,
             VisibilityTimeout:
               10 +
-              Math.pow(
-                2,
-                Number.parseInt(record.attributes.ApproximateReceiveCount),
-              ),
+              2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
           }),
         );
       }

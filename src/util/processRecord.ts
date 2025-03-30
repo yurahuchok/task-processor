@@ -19,7 +19,7 @@ export async function processRecord(record: SQSRecord) {
       TableName: config.TABLE_NAME,
       Key: {
         PK: { S: `TASK#${task.id}` },
-        SK: { S: `STATUS#SUCCESS` },
+        SK: { S: "STATUS#SUCCESS" },
       },
     }),
   );
@@ -37,7 +37,7 @@ export async function processRecord(record: SQSRecord) {
         TableName: config.TABLE_NAME,
         Item: {
           PK: { S: `TASK#${task.id}` },
-          SK: { S: `STATUS#SUCCESS` },
+          SK: { S: "STATUS#SUCCESS" },
           payload: { S: JSON.stringify(task.payload) },
           ts: { S: new Date().toISOString() },
         },
