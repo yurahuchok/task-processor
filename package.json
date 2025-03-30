@@ -4,7 +4,8 @@
     "check-types": "tsc --noEmit",
     "lint": "biome check",
     "lint:fix": "biome check --fix",
-    "lint:fix:unsafe": "biome check --fix --unsafe"
+    "lint:fix:unsafe": "biome check --fix --unsafe",
+    "dev:deploy": "serverless deploy --stage dev"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.777.0",
