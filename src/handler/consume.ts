@@ -10,12 +10,13 @@ import { processRecord } from "../util/processRecord";
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
   const client = new SQSClient();
   const config = getConfig();
+
   const batchItemFailures: SQSBatchItemFailure[] = [];
 
   await Promise.all(
     event.Records.map(async (record) => {
       try {
-        await processRecord(record);
+        processRecord(record);
       } catch (error) {
         batchItemFailures.push({ itemIdentifier: record.messageId });
 
