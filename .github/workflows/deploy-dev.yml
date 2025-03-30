@@ -6,6 +6,16 @@ on:
       - main
 
 jobs:
+  check-types:
+    name: check-types
+    runs-on: ubuntu-latest
+    steps:
+    - run: npm run check-types
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - run: npm run lint
   deploy:
     name: deploy
     runs-on: ubuntu-latest
