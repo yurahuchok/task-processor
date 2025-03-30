@@ -1,21 +1,21 @@
 import { TaskRepository } from "../../repository/TaskRepository";
 import { DynamoDBClientFactory } from "./DynamoDBClientFactory";
-import { ConfigServiceFactory } from "./ConfigServiceFactory";
+import { ConfigFactory } from "./ConfigFactory";
 
 export class TaskRepositoryFactory {
   static injectionToken = "TaskRepositoryFactory" as const;
 
   static inject = [
     DynamoDBClientFactory.injectionToken,
-    ConfigServiceFactory.injectionToken,
+    ConfigFactory.injectionToken,
   ] as const;
 
   constructor(
     protected dynamoDbClientFactory: DynamoDBClientFactory,
-    protected configServiceFactory: ConfigServiceFactory,
+    protected configFactory: ConfigFactory,
   ) {}
 
   make(): TaskRepository {
-    return new TaskRepository(this.dynamoDbClientFactory.make(), this.configServiceFactory.make());
+    return new TaskRepository(this.dynamoDbClientFactory.make(), this.configFactory.make().TABLE_NAME);
   }
 }

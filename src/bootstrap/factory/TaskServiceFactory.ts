@@ -1,8 +1,8 @@
-import { TaskService } from "../../service/TaskService";
+import { ProcessorService } from "../../service/ProcessorService";
 import { TaskRepositoryFactory } from "./TaskRepositoryFactory";
 
-export class TaskServiceFactory {
-  static injectionToken = "TaskServiceFactory" as const;
+export class ProcessorServiceFactory {
+  static injectionToken = "ProcessorServiceFactory" as const;
 
   static inject = [
     TaskRepositoryFactory.injectionToken
@@ -12,7 +12,7 @@ export class TaskServiceFactory {
     protected taskRepositoryFactory: TaskRepositoryFactory,
   ) {}
 
-  make(): TaskService {
-    return new TaskService(this.taskRepositoryFactory.make());
+  make() {
+    return new ProcessorService(this.taskRepositoryFactory.make());
   }
 }

@@ -1,14 +1,13 @@
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { Task } from "../type/Task";
-import { ConfigService } from "../service/ConfigService";
 
 export class TaskRepository {
-  constructor(protected dynamo: DynamoDBClient, protected config: ConfigService) {}
+  constructor(protected dynamo: DynamoDBClient, protected tableName: string) {}
 
-  async getTask(id: string): Promise<Task | undefined> {
+  async get(id: string): Promise<Task | undefined> {
     const result = await this.dynamo.send(
       new GetItemCommand({
-        TableName: this.config.get().TABLE_NAME,
+        TableName: this.tableName,
         Key: {
           id: { S: id },
         },
@@ -22,10 +21,10 @@ export class TaskRepository {
     return Task.parse(result.Item);
   }
 
-  async saveTask(task: Task, status: "SUCCESS") {
+  async create(task: Task, status: "SUCCESS") {
     await this.dynamo.send(
       new PutItemCommand({
-        TableName: this.config.get().TABLE_NAME,
+        TableName: this.tableName,
         Item: {
           PK: { S: `TASK#${task.id}` },
           SK: { S: `STATUS#${status}` },

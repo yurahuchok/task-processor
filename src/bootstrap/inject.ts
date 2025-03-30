@@ -1,17 +1,17 @@
 import { createInjector } from 'typed-inject';
 import { DynamoDBClientFactory } from './factory/DynamoDBClientFactory';
 import { TaskRepositoryFactory } from './factory/TaskRepositoryFactory';
-import { TaskServiceFactory } from './factory/TaskServiceFactory';
-import { ConfigServiceFactory } from './factory/ConfigServiceFactory';
+import { ProcessorServiceFactory } from './factory/TaskServiceFactory';
+import { ConfigFactory } from './factory/ConfigFactory';
 
 const injector = createInjector()
-  .provideClass(ConfigServiceFactory.injectionToken, ConfigServiceFactory)
+  .provideClass(ConfigFactory.injectionToken, ConfigFactory)
   .provideClass(DynamoDBClientFactory.injectionToken, DynamoDBClientFactory)
   .provideClass(TaskRepositoryFactory.injectionToken, TaskRepositoryFactory)
-  .provideClass(TaskServiceFactory.injectionToken, TaskServiceFactory);
+  .provideClass(ProcessorServiceFactory.injectionToken, ProcessorServiceFactory);
 
 export function inject() {
   return {
-    taskService: () => injector.resolve("TaskServiceFactory").make(),
+    processorService: () => injector.resolve("ProcessorServiceFactory").make(),
   }
 }
