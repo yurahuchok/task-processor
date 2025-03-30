@@ -6,6 +6,26 @@ on:
       - main
 
 jobs:
+  check-types:
+    name: check-types
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - run: npm ci
+    - run: npm run check-types
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - run: npm ci
+    - run: npm run lint
   deploy:
     name: deploy
     runs-on: ubuntu-latest
