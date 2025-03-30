@@ -2,8 +2,8 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint": "biome check",
+    "lint:fix": "biome check --write"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.777.0",

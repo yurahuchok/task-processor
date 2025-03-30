@@ -1,9 +1,9 @@
-import { PublishRequest } from "../request/PublishRequest";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
-import { getValidatedInput } from "../util/getValidatedInput";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { ZodError } from "zod";
+import { PublishRequest } from "../request/PublishRequest";
 import { getConfig } from "../util/getConfig";
-import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { getValidatedInput } from "../util/getValidatedInput";
 
 export async function handler(event: APIGatewayProxyEventV2) {
   try {
@@ -11,10 +11,12 @@ export async function handler(event: APIGatewayProxyEventV2) {
     const config = getConfig();
     const client = new SQSClient();
 
-    await client.send(new SendMessageCommand({
-      QueueUrl: config.QUEUE_URL,
-      MessageBody: JSON.stringify(input),
-    }));
+    await client.send(
+      new SendMessageCommand({
+        QueueUrl: config.QUEUE_URL,
+        MessageBody: JSON.stringify(input),
+      }),
+    );
 
     return {
       statusCode: 200,

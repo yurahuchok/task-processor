@@ -1,5 +1,5 @@
-import { type ZodObject } from "zod";
-import { type APIGatewayProxyEventV2 } from "aws-lambda";
+import type { APIGatewayProxyEventV2 } from "aws-lambda";
+import type { ZodObject } from "zod";
 
 type InputContainer<
   TParams extends ZodObject<any>,
@@ -13,7 +13,10 @@ type ZodInput = ZodObject<InputContainer<any, any, any, any>>;
 export function getValidatedInput<Z extends ZodInput>(
   event: APIGatewayProxyEventV2,
   z: Z,
-): Z["_output"]["query"] & Z["_output"]["body"] & Z["_output"]["params"] & Z["_output"]["headers"] {
+): Z["_output"]["query"] &
+  Z["_output"]["body"] &
+  Z["_output"]["params"] &
+  Z["_output"]["headers"] {
   const result = z.safeParse({
     query: event.queryStringParameters,
     body: event.body,
@@ -25,5 +28,10 @@ export function getValidatedInput<Z extends ZodInput>(
     throw result.error;
   }
 
-  return { ...result.data.query, ...result.data.body, ...result.data.params, ...result.data.headers };
+  return {
+    ...result.data.query,
+    ...result.data.body,
+    ...result.data.params,
+    ...result.data.headers,
+  };
 }
