@@ -3,12 +3,12 @@ import { DynamoDBClientFactory } from "./DynamoDBClientFactory";
 import { ConfigServiceFactory } from "./ConfigServiceFactory";
 
 export class TaskRepositoryFactory {
-  static injectionToken = "TaskRepositoryFactory";
+  static injectionToken = "TaskRepositoryFactory" as const;
 
   static inject = [
     DynamoDBClientFactory.injectionToken,
-    ConfigServiceFactory.injectionToken
-  ];
+    ConfigServiceFactory.injectionToken,
+  ] as const;
 
   constructor(
     protected dynamoDbClientFactory: DynamoDBClientFactory,
