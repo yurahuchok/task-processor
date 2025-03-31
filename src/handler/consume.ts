@@ -18,7 +18,11 @@ export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
     await Promise.all(
       event.Records.map(async (record) => {
         const task = queueService.getTaskFromRecord(record);
-        const result = await handleErrors(() => processorService.process(task));
+        
+        const result = await handleErrors(
+          () => processorService.process(task),
+          { procedure: "TaskProcessing", task, record }
+        );
 
         if (result.isErr()) {
           if (result.error._type === "TaskValidationError") {
@@ -33,7 +37,7 @@ export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
     );
 
     return batchItemFailures;
-  });
+  }, { procedure: "handler.consume", event });
 
   if (result.isErr()) {
     throw new Error("Internal Server Error.");

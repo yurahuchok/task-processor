@@ -9,7 +9,7 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     const input = getValidatedInput(event, PublishRequest);
     (await inject().QueueService()).publishTask(input);
     return { task: input };
-  });
+  }, { procedure: "handler.publish", event });
 
   if (result.isErr()) {
     return {
