@@ -3,13 +3,16 @@ import { inject } from "../bootstrap/inject";
 import { handleErrors } from "../util/handleErrors";
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const result = await handleErrors(async () => {
-    await inject().Config(); // Injecting config to check environment configuration.
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "OK" }),
-    };
-  }, { procedure: "handler.health", event });
+  const result = await handleErrors(
+    { procedure: "handler.health", event },
+    async () => {
+      await inject().Config(); // Injecting config to check environment configuration.
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: "OK" }),
+      };
+    },
+  );
 
   if (result.isErr()) {
     return {

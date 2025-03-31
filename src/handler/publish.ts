@@ -5,11 +5,14 @@ import { getValidatedInput } from "../util/getValidatedInput";
 import { handleErrors } from "../util/handleErrors";
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const result = await handleErrors(async () => {
-    const input = getValidatedInput(event, PublishRequest);
-    (await inject().QueueService()).publishTask(input);
-    return { task: input };
-  }, { procedure: "handler.publish", event });
+  const result = await handleErrors(
+    { procedure: "handler.publish", event },
+    async () => {
+      const input = getValidatedInput(event, PublishRequest);
+      (await inject().QueueService()).publishTask(input);
+      return { task: input };
+    }
+  );
 
   if (result.isErr()) {
     return {

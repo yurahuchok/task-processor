@@ -1,7 +1,7 @@
 import { TaskRepository } from "../repository/TaskRepository";
 import { Task } from "../type/Task";
 import { getRandomNumber } from "../util/getRandomNumber";
-import { TaskValidationError } from "../error/TaskValidationError";
+import { TaskDuplicateError } from "../error/TaskDuplicateError";
 import { TaskProcessingError } from "../error/TaskProcessingError";
 
 export class ProcessorService {
@@ -11,7 +11,7 @@ export class ProcessorService {
     const exists = await this.repository.get(task.id);
 
     if (exists !== undefined) {
-      throw new TaskValidationError("Task ID already exists.");
+      throw new TaskDuplicateError("Task ID already exists in the database.");
     }
   }
 

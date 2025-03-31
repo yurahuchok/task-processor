@@ -1,6 +1,7 @@
 import { Task } from "../type/Task";
 import { ChangeMessageVisibilityCommand, DeleteMessageCommand, SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import type { SQSRecord } from "aws-lambda";
+import { TaskParsingError } from "../error/TaskParsingError";
 
 
 export class QueueService {
@@ -16,13 +17,11 @@ export class QueueService {
     )
   }
 
-  getTaskFromRecord(record: SQSRecord) {
+  parseTaskFromRecord(record: SQSRecord) {
     const result = Task.safeParse(JSON.parse(record.body));
-
     if (!result.success) {
-      throw result.error;
+      throw new TaskParsingError(record, result.error);
     }
-
     return result.data;
   }
 
