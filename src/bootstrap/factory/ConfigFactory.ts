@@ -1,9 +1,10 @@
 import { Config } from "../../type/Config";
+import { BaseFactory } from "./BaseFactory";
 
-export class ConfigFactory {
+export class ConfigFactory extends BaseFactory<Config> {
   static injectionToken = "ConfigFactory" as const;
 
-  make(): Config {
+  protected async _make() {
     return Config.parse(process.env);
   }
 }

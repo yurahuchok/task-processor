@@ -24,7 +24,7 @@ export class QueueService {
     const result = Task.safeParse(JSON.parse(record.body));
 
     if (!result.success) {
-      return new RetrieveError(result.error);
+      throw new RetrieveError(result.error);
     }
 
     return result.data;

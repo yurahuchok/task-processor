@@ -4,34 +4,39 @@ import type {
   SQSBatchResponse,
   SQSEvent,
 } from "aws-lambda";
-import { getConfig } from "../util/getConfig";
-import { processRecord } from "../util/processRecord";
+import { runHandler } from "../util/runHandler";
+import { inject } from "../bootstrap/inject";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const client = new SQSClient();
-  const config = getConfig();
+  const result = await runHandler(async () => {
+    const [queueService, processorService] = await Promise.all([
+      inject().QueueService(),
+      inject().ProcessorService(),
+    ]);
 
-  const batchItemFailures: SQSBatchItemFailure[] = [];
+    const batchItemFailures: SQSBatchItemFailure[] = [];
 
-  await Promise.all(
-    event.Records.map(async (record) => {
-      try {
-        processRecord(record);
-      } catch (error) {
-        batchItemFailures.push({ itemIdentifier: record.messageId });
+    await Promise.all(
+      queueService.retrieveManyFromEvent(event).map(async (task) => {
+        try {
+          await processorService.process(task);
+        } catch (error) {
+          batchItemFailures.push({ itemIdentifier: task.id });
+        }
+      })
+    );
 
-        await client.send(
-          new ChangeMessageVisibilityCommand({
-            QueueUrl: config.QUEUE_URL,
-            ReceiptHandle: record.receiptHandle,
-            VisibilityTimeout:
-              10 +
-              2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
-          }),
-        );
-      }
-    }),
-  );
+    return {
+      statusCode: 200 as const,
+      batchItemFailures,
+    };
+  });
 
-  return { batchItemFailures };
+  if (result.statusCode === 200) {
+    return {
+      batchItemFailures: result.batchItemFailures,
+    }
+  }
+
+  throw new Error("Internal Server Error.");
 }

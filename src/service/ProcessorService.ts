@@ -11,8 +11,6 @@ export class ProcessorService {
     if (exists !== undefined) {
       throw new Error("Task ID already exists.");
     }
-
-    return this;
   }
 
   async process(task: Task) {
@@ -28,8 +26,9 @@ export class ProcessorService {
 
     if (isSuccess) {  
       await this.repository.create(task, "SUCCESS");
+      return;
     }
 
-    return this;
+    throw new Error("Failed to process task.");
   }
 }

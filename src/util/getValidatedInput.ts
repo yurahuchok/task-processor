@@ -1,23 +1,24 @@
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
-import type { ZodObject } from "zod";
+import type { ZodTypeAny, ZodObject } from "zod";
+import { ValidationError } from "../error/ValidationError";
 
-type InputContainer<
-  TParams extends ZodObject<any>,
-  TQuery extends ZodObject<any>,
-  TBody extends ZodObject<any>,
-  THeaders extends ZodObject<any>,
-> = { query?: TQuery; body?: TBody; params?: TParams; headers?: THeaders };
+export type ZodInput = ZodObject<{
+  query?: ZodTypeAny,
+  body?: ZodTypeAny,
+  params?: ZodTypeAny,
+  headers?: ZodTypeAny,
+}>;
 
-type ZodInput = ZodObject<InputContainer<any, any, any, any>>;
-
-export function getValidatedInput<Z extends ZodInput>(
-  event: APIGatewayProxyEventV2,
-  z: Z,
-): Z["_output"]["query"] &
+export type ZodOutput<Z extends ZodInput> = Z["_output"]["query"] &
   Z["_output"]["body"] &
   Z["_output"]["params"] &
-  Z["_output"]["headers"] {
-  const result = z.safeParse({
+  Z["_output"]["headers"];
+
+export function getValidatedInput<TInput extends ZodInput>(
+  event: APIGatewayProxyEventV2,
+  schema: TInput,
+): ZodOutput<TInput> {
+  const result = schema.safeParse({
     query: event.queryStringParameters,
     body: event.body,
     params: event.pathParameters,
@@ -25,13 +26,13 @@ export function getValidatedInput<Z extends ZodInput>(
   });
 
   if (!result.success) {
-    throw result.error;
+    throw new ValidationError(result.error);
   }
 
   return {
-    ...result.data.query,
-    ...result.data.body,
-    ...result.data.params,
-    ...result.data.headers,
+    ...(result.data?.query ?? {}),
+    ...(result.data?.body ?? {}),
+    ...(result.data?.params ?? {}),
+    ...(result.data?.headers ?? {}),
   };
 }
