@@ -1,4 +1,5 @@
 import { fromPromise, okAsync } from "neverthrow";
+import { inject } from "../bootstrap/inject";
 import { AuthorizationError } from "../error/AuthorizationError";
 import { BadRequestError } from "../error/BadRequestError";
 import { ConflictError } from "../error/ConflictError";
@@ -6,14 +7,15 @@ import { ForbiddenError } from "../error/ForbiddenError";
 import { NotFoundError } from "../error/NotFoundError";
 import { ServiceError } from "../error/ServiceError";
 import { ValidationError } from "../error/ValidationError";
-import { inject } from "../bootstrap/inject";
+import { TaskValidationError } from "../error/TaskValidationError";
+import { TaskProcessingError } from "../error/TaskProcessingError";
 
 type Meta = {
   procedure: string;
   [key: string]: unknown;
 }
 
-export function safeProcedure<T>(fn: () => Promise<T>, meta?: Meta) {
+export function handleErrors<T>(fn: () => Promise<T>, meta?: Meta) {
   return okAsync({})
     .andThen(() => {
       return fromPromise(
@@ -26,29 +28,35 @@ export function safeProcedure<T>(fn: () => Promise<T>, meta?: Meta) {
         fn(),
         (error: unknown) => {
           if (error instanceof ValidationError) {
-            logger.info("tolerated: ValidationError occurred.", { error, meta });
+            logger.info("handleErrors: ValidationError occurred.", { error, meta });
             return error;
           } else if (error instanceof BadRequestError) {
-            logger.info("tolerated: BadRequestError occurred.", { error, meta });
+            logger.info("handleErrors: BadRequestError occurred.", { error, meta });
             return error;
           } else if (error instanceof AuthorizationError) {
-            logger.info("tolerated: AuthorizationError occurred.", { error, meta });
+            logger.info("handleErrors: AuthorizationError occurred.", { error, meta });
             return error;
           } else if (error instanceof ForbiddenError) {
-            logger.warn("tolerated: ForbiddenError occurred.", { error, meta });
+            logger.warn("handleErrors: ForbiddenError occurred.", { error, meta });
             return error;
           } else if (error instanceof NotFoundError) {
-            logger.info("tolerated: NotFoundError occurred.", { error, meta });
+            logger.info("handleErrors: NotFoundError occurred.", { error, meta });
             return error;
           } else if (error instanceof ConflictError) {
-            logger.info("tolerated: ConflictError occurred.", { error, meta });
+            logger.info("handleErrors: ConflictError occurred.", { error, meta });
             return error;
           } else if (error instanceof ServiceError) {
-            logger.error("tolerated: ServiceError occurred.", { error, meta });
+            logger.error("handleErrors: ServiceError occurred.", { error, meta });
+            return error;
+          } else if (error instanceof TaskValidationError) {
+            logger.info("handleErrors: TaskValidationError occurred.", { error, meta });
+            return error;
+          } else if (error instanceof TaskProcessingError) {
+            logger.warn("handleErrors: TaskProcessingError occurred.", { error, meta });
             return error;
           }
       
-          logger.error("tolerated: Unexpected Error occurred.", { error, meta });
+          logger.error("handleErrors: Unexpected Error occurred.", { error, meta });
           return new ServiceError("Unexpected Error", error);
         }
       );

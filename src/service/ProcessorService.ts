@@ -1,17 +1,8 @@
-import { BaseError } from "../error/BaseError";
 import { TaskRepository } from "../repository/TaskRepository";
 import { Task } from "../type/Task";
 import { getRandomNumber } from "../util/getRandomNumber";
-
-export class TaskValidationError extends BaseError<"ValidationError", 500> {
-  readonly _type = "ValidationError";
-  readonly _statusCode = 500;
-}
-
-export class TaskProcessingError extends BaseError<"ProcessingError", 500> {
-  readonly _type = "ProcessingError";
-  readonly _statusCode = 500;
-}
+import { TaskValidationError } from "../error/TaskValidationError";
+import { TaskProcessingError } from "../error/TaskProcessingError";
 
 export class ProcessorService {
   constructor(protected repository: TaskRepository) {}

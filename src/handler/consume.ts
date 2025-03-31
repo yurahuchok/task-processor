@@ -1,14 +1,13 @@
-import { ChangeMessageVisibilityCommand, SQSClient } from "@aws-sdk/client-sqs";
 import type {
   SQSBatchItemFailure,
   SQSBatchResponse,
   SQSEvent,
 } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
-import { safeProcedure } from "../util/safeProcedure";
+import { handleErrors } from "../util/handleErrors";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const result = await safeProcedure(async () => {
+  const result = await handleErrors(async () => {
     const [queueService, processorService] = await Promise.all([
       inject().QueueService(),
       inject().ProcessorService(),
@@ -19,11 +18,16 @@ export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
     await Promise.all(
       event.Records.map(async (record) => {
         const task = queueService.getTaskFromRecord(record);
-        const result = await safeProcedure(() => processorService.process(task));
+        const result = await handleErrors(() => processorService.process(task));
 
         if (result.isErr()) {
+          if (result.error._type === "TaskValidationError") {
+            await queueService.removeRecordFromQueue(record);
+            return;
+          }
+
           batchItemFailures.push({ itemIdentifier: task.id });
-          queueService.increaseRetryDelayForRecord(record);
+          await queueService.increaseRetryDelayForRecord(record);
         }
       }),
     );

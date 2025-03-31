@@ -1,5 +1,5 @@
 import { Task } from "../type/Task";
-import { ChangeMessageVisibilityCommand, SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { ChangeMessageVisibilityCommand, DeleteMessageCommand, SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import type { SQSRecord } from "aws-lambda";
 
 
@@ -34,6 +34,15 @@ export class QueueService {
         VisibilityTimeout:
           10 +
           2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
+      })
+    );
+  }
+
+  removeRecordFromQueue(record: SQSRecord) {
+    return this.sqsClient.send(
+      new DeleteMessageCommand({
+        QueueUrl: this.queueUrl,
+        ReceiptHandle: record.receiptHandle,
       })
     );
   }
