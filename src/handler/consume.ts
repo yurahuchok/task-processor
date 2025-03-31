@@ -4,39 +4,33 @@ import type {
   SQSBatchResponse,
   SQSEvent,
 } from "aws-lambda";
-import { runHandler } from "../util/runHandler";
 import { inject } from "../bootstrap/inject";
+import { tolerated } from "../util/tolerated";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const result = await runHandler(async () => {
+  const result = await tolerated(async () => {
     const [queueService, processorService] = await Promise.all([
       inject().QueueService(),
       inject().ProcessorService(),
     ]);
 
+    const tasks = queueService.retrieveManyFromEvent(event);
     const batchItemFailures: SQSBatchItemFailure[] = [];
 
     await Promise.all(
-      queueService.retrieveManyFromEvent(event).map(async (task) => {
-        try {
-          await processorService.process(task);
-        } catch (error) {
-          batchItemFailures.push({ itemIdentifier: task.id });
-        }
-      })
+      tasks.map((task) => tolerated(() => processorService.process(task), { taskId: task.id }).mapErr(() => {
+        batchItemFailures.push({ itemIdentifier: task.id });
+      })),
     );
 
-    return {
-      statusCode: 200 as const,
-      batchItemFailures,
-    };
+    return batchItemFailures;
   });
 
-  if (result.statusCode === 200) {
-    return {
-      batchItemFailures: result.batchItemFailures,
-    }
+  if (result.isErr()) {
+    throw new Error("Internal Server Error.");
   }
 
-  throw new Error("Internal Server Error.");
+  return {
+    batchItemFailures: result.value,
+  }
 }
