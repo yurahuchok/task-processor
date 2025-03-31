@@ -1,9 +1,9 @@
 import { APIGatewayProxyResultV2 } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
-import { tolerated } from "../util/tolerated";
+import { safeProcedure } from "../util/safeProcedure";
 
 export async function handler(): Promise<APIGatewayProxyResultV2> {
-  const result = await tolerated(async () => {
+  const result = await safeProcedure(async () => {
    await inject().Config(); // Injecting config to check environment configuration.
    
     return {

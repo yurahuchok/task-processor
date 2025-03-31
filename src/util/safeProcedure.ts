@@ -1,4 +1,4 @@
-import { err, fromPromise, okAsync } from "neverthrow";
+import { fromPromise, okAsync } from "neverthrow";
 import { AuthorizationError } from "../error/AuthorizationError";
 import { BadRequestError } from "../error/BadRequestError";
 import { ConflictError } from "../error/ConflictError";
@@ -8,7 +8,12 @@ import { ServiceError } from "../error/ServiceError";
 import { ValidationError } from "../error/ValidationError";
 import { inject } from "../bootstrap/inject";
 
-export function tolerated<T>(fn: () => Promise<T>, meta?: Record<string, unknown>) {
+type Meta = {
+  procedure: string;
+  [key: string]: unknown;
+}
+
+export function safeProcedure<T>(fn: () => Promise<T>, meta?: Meta) {
   return okAsync({})
     .andThen(() => {
       return fromPromise(

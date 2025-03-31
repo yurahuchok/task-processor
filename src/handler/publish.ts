@@ -2,12 +2,12 @@ import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
 import { PublishRequest } from "../request/PublishRequest";
 import { getValidatedInput } from "../util/getValidatedInput";
-import { tolerated } from "../util/tolerated";
+import { safeProcedure } from "../util/safeProcedure";
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const result = await tolerated(async () => {
+  const result = await safeProcedure(async () => {
     const input = getValidatedInput(event, PublishRequest);
-    (await inject().QueueService()).publish(input);
+    (await inject().QueueService()).publishTask(input);
     return { task: input };
   });
 
