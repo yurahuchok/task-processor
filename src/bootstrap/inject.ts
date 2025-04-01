@@ -8,6 +8,7 @@ import { PublisherServiceFactory } from "./factory/PublisherServiceFactory";
 import { QueueServiceFactory } from "./factory/QueueServiceFactory";
 import { SQSClientFactory } from "./factory/SQSClientFactory";
 import { TaskRepositoryFactory } from "./factory/TaskRepositoryFactory";
+
 const injector = createInjector()
   .provideClass(ConfigFactory.injectionToken, ConfigFactory)
   .provideClass(LoggerFactory.injectionToken, LoggerFactory)
