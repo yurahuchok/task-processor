@@ -3,12 +3,12 @@ import type {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
-import { handleError } from "../util/handleError";
+import { tolerateAllErrors } from "../util/tolerateAllErrors";
 
 export async function handler(
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> {
-  const result = await handleError(
+  const result = await tolerateAllErrors(
     { procedure: "handler.health", event },
     async () => {
       await inject().Config(); // Injecting config to check environment configuration.
@@ -20,10 +20,7 @@ export async function handler(
   );
 
   if (result.isErr()) {
-    return {
-      statusCode: result.error._statusCode,
-      body: result.error.message,
-    };
+    return { statusCode: result.error._statusCode };
   }
 
   return result.value;

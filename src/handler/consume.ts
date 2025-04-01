@@ -1,9 +1,9 @@
 import type { SQSBatchResponse, SQSEvent } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
-import { handleError } from "../util/handleError";
+import { tolerateAllErrors } from "../util/tolerateAllErrors";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const result = await handleError(
+  const result = await tolerateAllErrors(
     { procedure: "handler.consume", event },
     async () => (await inject().ConsumerService()).consumeEvent(event),
   );

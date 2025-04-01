@@ -3,7 +3,6 @@ import {
   GetItemCommand,
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { fromAsyncThrowable, fromPromise, fromThrowable } from "neverthrow";
 import { Task } from "../type/Task";
 
 export class TaskRepository {
@@ -30,21 +29,18 @@ export class TaskRepository {
   }
 
   async create(task: Task, status: "SUCCESS") {
-    return fromPromise(
-      this.dynamo.send(
-        new PutItemCommand({
-          TableName: this.tableName,
-          Item: {
-            PK: { S: `TASK#${task.id}` },
-            SK: { S: `STATUS#${status}` },
-            payload: { S: JSON.stringify(task.payload) },
-            ts: { S: new Date().toISOString() },
-          },
-          ConditionExpression:
-            "attribute_not_exists(PK) AND attribute_not_exists(SK)",
-        }),
-      ),
-      (error: unknown) => {},
+    return this.dynamo.send(
+      new PutItemCommand({
+        TableName: this.tableName,
+        Item: {
+          PK: { S: `TASK#${task.id}` },
+          SK: { S: `STATUS#${status}` },
+          payload: { S: JSON.stringify(task.payload) },
+          ts: { S: new Date().toISOString() },
+        },
+        ConditionExpression:
+          "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+      }),
     );
   }
 }

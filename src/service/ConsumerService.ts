@@ -1,8 +1,8 @@
 import type { SQSBatchItemFailure, SQSEvent, SQSRecord } from "aws-lambda";
-import { okAsync } from "neverthrow";
-import { handleError } from "../util/handleError";
 import type { ProcessorService } from "./ProcessorService";
 import type { QueueService } from "./QueueService";
+import { tolerateError } from "../util/tolerateError";
+import { TaskDuplicateError } from "../error/TaskDuplicateError";
 
 export class ConsumerService {
   constructor(
@@ -17,7 +17,7 @@ export class ConsumerService {
     await Promise.all(
       records.map(async (record) => {
         const result = await this.consumeRecord(record);
-        if (result.isErr()) {
+        if (result === false) {
           batchItemFailures.push({ itemIdentifier: record.messageId });
         }
       }),
@@ -26,42 +26,34 @@ export class ConsumerService {
     return { batchItemFailures };
   }
 
-  consumeRecord(record: SQSRecord) {
-    return okAsync({})
-      .andThen(() => {
-        return handleError(
-          { procedure: "ConsumerService.consumeRecord.task-parse", record },
-          async () => this.queueService.parseTaskFromRecord(record),
-        );
-      })
-      .andThen((task) => {
-        return handleError(
-          {
-            procedure: "ConsumerService.consumeRecord.task-process",
-            task,
-            record,
-          },
-          async () => this.processorService.process(task),
-        );
-      })
-      .orElse((error) => {
-        return handleError(
-          {
-            procedure: "ConsumerService.consumeRecord.task-error-post-process",
-            error,
-            record,
-          },
-          async () => {
-            if (
-              error._type === "TaskParsingError" ||
-              error._type === "TaskDuplicateError"
-            ) {
-              this.queueService.removeRecordFromQueue(record);
-            } else {
-              this.queueService.increaseRetryDelayForRecord(record);
-            }
-          },
-        );
-      });
+  async consumeRecord(record: SQSRecord) {
+    const task = await tolerateError(
+      { procedure: "ConsumerService.consumeRecord.task-parse", record },
+      async () => this.queueService.parseTaskFromRecord(record),
+    );
+
+    if (task.isErr()) {
+      this.queueService.removeRecordFromQueue(record);
+      return false;
+    }
+
+    const processingResult = await tolerateError(
+      { procedure: "ConsumerService.consumeRecord.task-process", task, record },
+      async () => this.processorService.process(task.value),
+    );
+    
+    if (processingResult.isErr()) {
+      const internalError = processingResult.error.internal;
+
+      if (internalError instanceof TaskDuplicateError) {
+        this.queueService.removeRecordFromQueue(record);
+        return false;
+      }
+
+      this.queueService.increaseRetryDelayForRecord(record);
+      return false;
+    }
+
+    return true;
   }
 }

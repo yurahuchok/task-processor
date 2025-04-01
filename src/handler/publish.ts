@@ -5,12 +5,12 @@ import type {
 import { inject } from "../bootstrap/inject";
 import { PublishRequest } from "../request/PublishRequest";
 import { getValidatedInput } from "../util/getValidatedInput";
-import { handleError } from "../util/handleError";
+import { tolerateAllErrors } from "../util/tolerateAllErrors";
 
 export async function handler(
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> {
-  const result = await handleError(
+  const result = await tolerateAllErrors(
     { procedure: "handler.publish", event },
     async () =>
       (await inject().PublisherService()).publishTask(
@@ -19,14 +19,8 @@ export async function handler(
   );
 
   if (result.isErr()) {
-    return {
-      statusCode: result.error._statusCode,
-      body: result.error.message,
-    };
+    return { statusCode: result.error._statusCode };
   }
 
-  return {
-    statusCode: 200,
-    body: "Task has been published.",
-  };
+  return { statusCode: 201 };
 }
