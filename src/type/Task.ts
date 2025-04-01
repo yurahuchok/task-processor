@@ -1,16 +1,20 @@
 import { z } from "zod";
 
-export const Task = z.object({
-  id: z.string().min(1),
-  payload: z.object({
-    simulation: z
+export const Task = z
+  .object({
+    id: z.string().min(1),
+    payload: z
       .object({
-        executionTime: z.number().min(0).max(1000),
-        failureChance: z.number().min(0).max(1),
+        simulation: z
+          .object({
+            executionTime: z.number().min(0).max(1000),
+            failureChance: z.number().min(0).max(1),
+          })
+          .partial()
+          .optional(),
       })
-      .partial()
-      .optional(),
-  }),
-});
+      .passthrough(),
+  })
+  .strict();
 
 export type Task = z.infer<typeof Task>;
