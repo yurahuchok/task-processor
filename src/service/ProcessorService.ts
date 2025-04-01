@@ -3,7 +3,6 @@ import { TaskProcessingError } from "../error/TaskProcessingError";
 import { TaskResultStorageError } from "../error/TaskResultStorageError";
 import type { TaskRepository } from "../repository/TaskRepository";
 import type { Task } from "../type/Task";
-import { getRandomNumber } from "../util/getRandomNumber";
 import { tolerateError } from "../util/tolerateError";
 
 export class ProcessorService {
@@ -73,12 +72,15 @@ export class ProcessorService {
     }
   }
 
-  protected async simulateProcessing(_task: Task) {
-    const time = getRandomNumber(100, 200);
-    const failureRate = 0.3;
+  protected async simulateProcessing(task: Task) {
+    const failureChance = task.payload.simulation?.failureChance ?? 0.3;
+    const executionTime = Math.min(
+      Math.max(task.payload.simulation?.executionTime ?? 0, 0),
+      1000,
+    );
 
     const isSuccess = await new Promise<boolean>((resolve) => {
-      setTimeout(() => resolve(Math.random() > failureRate), time);
+      setTimeout(() => resolve(Math.random() > failureChance), executionTime);
     });
 
     if (!isSuccess) {
