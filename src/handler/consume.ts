@@ -9,7 +9,7 @@ export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
   );
 
   if (result.isErr()) {
-    throw new Error("Internal Server Error.");
+    throw new Error("Internal Server Error");
   }
 
   return result.value;
