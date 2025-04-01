@@ -5,6 +5,7 @@ export async function injectLoggerOrThrow() {
     return await inject().Logger();
   } catch (error) {
     console.log("Failed to inject Logger instance for error handling.");
+    console.log(error);
     throw new Error("Internal Server Error");
   }
 }

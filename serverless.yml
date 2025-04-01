@@ -1,8 +1,5 @@
-# "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: yurahuchok
-# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: task-processor
-# "service" is the name of this project. This will also be added to your AWS resource names.
 service: task-processor
 
 constructs:
@@ -24,6 +21,7 @@ provider:
   runtime: nodejs20.x
   region: eu-central-1
   environment:
+    NODE_ENV: ${sls:stage}
     TABLE_NAME: ${construct:table-processed-tasks.tableName}
     QUEUE_URL: ${construct:q-tasks.queueUrl}
 

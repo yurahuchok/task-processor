@@ -1,5 +1,6 @@
 import {
   type DynamoDBClient,
+  DeleteItemCommand,
   GetItemCommand,
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
@@ -16,7 +17,7 @@ export class TaskRepository {
       new GetItemCommand({
         TableName: this.tableName,
         Key: {
-          id: { S: id },
+          PK: { S: `TASK#${id}` },
         },
       }),
     );
@@ -28,7 +29,19 @@ export class TaskRepository {
     return Task.parse(result.Item);
   }
 
-  async create(task: Task, status: "SUCCESS") {
+  async delete(id: string, status: "SUCCESS" | "LOCKED") {
+    return this.dynamo.send(
+      new DeleteItemCommand({
+        TableName: this.tableName,
+        Key: {
+          PK: { S: `TASK#${id}` },
+          SK: { S: `STATUS#${status}` },
+        },
+      }),
+    );
+  }
+
+  async create(task: Task, status: "SUCCESS" | "LOCKED") {
     return this.dynamo.send(
       new PutItemCommand({
         TableName: this.tableName,

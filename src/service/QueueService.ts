@@ -18,8 +18,16 @@ export class QueueService {
     await this.sqsClient.send(
       new SendMessageCommand({
         QueueUrl: this.queueUrl,
+
+        /**
+         * NOTE.
+         * We can use FIFO queue to have deduplication, but it's too much overhead for this use case IMO.
+         * So instead, opting for a simple queue and handling deduplication only at the consumer level (DynamoDB).
+         */
+        // MessageGroupId: task.id,
+        // MessageDeduplicationId: task.id,
+
         MessageBody: JSON.stringify(task),
-        MessageDeduplicationId: task.id,
       }),
     );
   }
