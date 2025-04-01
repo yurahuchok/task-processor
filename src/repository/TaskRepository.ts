@@ -4,8 +4,8 @@ import {
   PutItemCommand,
   QueryCommand,
 } from "@aws-sdk/client-dynamodb";
-import type { Task } from "../type/Task";
 import { serializeError } from "serialize-error";
+import type { Task } from "../type/Task";
 
 export class TaskRepository {
   constructor(
@@ -13,12 +13,12 @@ export class TaskRepository {
     protected tableName: string,
   ) {}
 
-  async putLockRecord(task: Task) {
+  async putLockRecord(id: string) {
     return this.dynamo.send(
       new PutItemCommand({
         TableName: this.tableName,
         Item: {
-          PK: { S: `TASK#${task.id}` },
+          PK: { S: `TASK#${id}` },
           SK: { S: "STATUS#LOCKED" },
           ts: { S: new Date().toISOString() },
         },
