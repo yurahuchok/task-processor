@@ -1,36 +1,16 @@
-import { ChangeMessageVisibilityCommand, SQSClient } from "@aws-sdk/client-sqs";
-import type {
-  SQSBatchItemFailure,
-  SQSBatchResponse,
-  SQSEvent,
-} from "aws-lambda";
-import { getConfig } from "../util/getConfig";
-import { processRecord } from "../util/processRecord";
+import type { SQSBatchResponse, SQSEvent } from "aws-lambda";
+import { inject } from "../bootstrap/inject";
+import { tolerateAllErrors } from "../util/tolerateAllErrors";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const client = new SQSClient();
-  const config = getConfig();
-  const batchItemFailures: SQSBatchItemFailure[] = [];
-
-  await Promise.all(
-    event.Records.map(async (record) => {
-      try {
-        await processRecord(record);
-      } catch (error) {
-        batchItemFailures.push({ itemIdentifier: record.messageId });
-
-        await client.send(
-          new ChangeMessageVisibilityCommand({
-            QueueUrl: config.QUEUE_URL,
-            ReceiptHandle: record.receiptHandle,
-            VisibilityTimeout:
-              10 +
-              2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
-          }),
-        );
-      }
-    }),
+  const result = await tolerateAllErrors(
+    { procedure: "handler.consume", event },
+    async () => (await inject().ConsumerService()).consumeEvent(event),
   );
 
-  return { batchItemFailures };
+  if (result.isErr()) {
+    throw new Error("Internal Server Error");
+  }
+
+  return result.value;
 }
