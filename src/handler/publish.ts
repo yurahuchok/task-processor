@@ -22,6 +22,9 @@ export async function handler(
     if (result.error._type === "ValidationError") {
       return {
         statusCode: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(result.error.zodError.format()),
       };
     }
