@@ -19,6 +19,13 @@ export async function handler(
   );
 
   if (result.isErr()) {
+    if (result.error._type === "ValidationError") {
+      return {
+        statusCode: 400,
+        body: JSON.stringify(result.error.zodError.format()),
+      };
+    }
+
     return { statusCode: result.error._statusCode };
   }
 
