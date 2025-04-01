@@ -18,7 +18,10 @@ export class ProcessorService {
     );
 
     if (result.isErr()) {
-      throw new TaskDuplicateError("Task ID already exists in the database. Cannot process.", result.error);
+      throw new TaskDuplicateError(
+        "Task ID already exists in the database. Cannot process.",
+        result.error,
+      );
     }
   }
 
@@ -31,7 +34,10 @@ export class ProcessorService {
     );
 
     if (result.isErr()) {
-      throw new TaskResultStorageError("Failed to unlock task for further processing.", result.error);
+      throw new TaskResultStorageError(
+        "Failed to unlock task for further processing.",
+        result.error,
+      );
     }
   }
 
@@ -44,7 +50,10 @@ export class ProcessorService {
     );
 
     if (result.isErr()) {
-      throw new TaskResultStorageError("Failed to store task as successful.", result.error);
+      throw new TaskResultStorageError(
+        "Failed to store task as successful.",
+        result.error,
+      );
     }
   }
 
