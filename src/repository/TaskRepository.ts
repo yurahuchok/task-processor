@@ -1,5 +1,6 @@
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { Task } from "../type/Task";
+import { fromAsyncThrowable, fromPromise, fromThrowable } from "neverthrow";
 
 export class TaskRepository {
   constructor(protected dynamo: DynamoDBClient, protected tableName: string) {}
@@ -22,7 +23,7 @@ export class TaskRepository {
   }
 
   async create(task: Task, status: "SUCCESS") {
-    await this.dynamo.send(
+    return fromPromise(this.dynamo.send(
       new PutItemCommand({
         TableName: this.tableName,
         Item: {
@@ -33,6 +34,6 @@ export class TaskRepository {
         },
         ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
       }),
-    );
+    ), (error: unknown) => {});
   }
 }

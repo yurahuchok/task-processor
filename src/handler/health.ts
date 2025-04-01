@@ -1,9 +1,9 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
-import { handleErrors } from "../util/handleErrors";
+import { handleError } from "../util/handleError";
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const result = await handleErrors(
+  const result = await handleError(
     { procedure: "handler.health", event },
     async () => {
       await inject().Config(); // Injecting config to check environment configuration.

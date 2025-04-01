@@ -2,16 +2,12 @@ import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { inject } from "../bootstrap/inject";
 import { PublishRequest } from "../request/PublishRequest";
 import { getValidatedInput } from "../util/getValidatedInput";
-import { handleErrors } from "../util/handleErrors";
+import { handleError } from "../util/handleError";
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const result = await handleErrors(
+  const result = await handleError(
     { procedure: "handler.publish", event },
-    async () => {
-      const input = getValidatedInput(event, PublishRequest);
-      (await inject().QueueService()).publishTask(input);
-      return { task: input };
-    }
+    async () => (await inject().PublisherService()).publishTask(getValidatedInput(event, PublishRequest))
   );
 
   if (result.isErr()) {
@@ -23,6 +19,6 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
 
   return {
     statusCode: 200,
-    body: JSON.stringify(result.value),
+    body: "Task has been published.",
   };
 }

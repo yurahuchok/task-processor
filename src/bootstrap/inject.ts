@@ -6,7 +6,8 @@ import { ConfigFactory } from './factory/ConfigFactory';
 import { LoggerFactory } from './factory/LoggerFactory';
 import { QueueServiceFactory } from './factory/QueueServiceFactory';
 import { SQSClientFactory } from './factory/SQSClientFactory';
-
+import { ConsumerServiceFactory } from './factory/ConsumerServiceFactory';
+import { PublisherServiceFactory } from './factory/PublisherServiceFactory';
 const injector = createInjector()
   .provideClass(ConfigFactory.injectionToken, ConfigFactory)
   .provideClass(LoggerFactory.injectionToken, LoggerFactory)
@@ -14,13 +15,15 @@ const injector = createInjector()
   .provideClass(SQSClientFactory.injectionToken, SQSClientFactory)
   .provideClass(TaskRepositoryFactory.injectionToken, TaskRepositoryFactory)
   .provideClass(QueueServiceFactory.injectionToken, QueueServiceFactory)
-  .provideClass(ProcessorServiceFactory.injectionToken, ProcessorServiceFactory);
+  .provideClass(ProcessorServiceFactory.injectionToken, ProcessorServiceFactory)
+  .provideClass(PublisherServiceFactory.injectionToken, PublisherServiceFactory)
+  .provideClass(ConsumerServiceFactory.injectionToken, ConsumerServiceFactory);
 
 export function inject() {
   return {
     Config: () => injector.resolve("ConfigFactory").make(),
     Logger: () => injector.resolve("LoggerFactory").make(),
-    ProcessorService: () => injector.resolve("ProcessorServiceFactory").make(),
-    QueueService: () => injector.resolve("QueueServiceFactory").make(),
+    PublisherService: () => injector.resolve("PublisherServiceFactory").make(),
+    ConsumerService: () => injector.resolve("ConsumerServiceFactory").make(),
   }
 }
