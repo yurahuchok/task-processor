@@ -1,8 +1,8 @@
 import type { SQSBatchItemFailure, SQSEvent, SQSRecord } from "aws-lambda";
+import { TaskDuplicateError } from "../error/TaskDuplicateError";
+import { tolerateError } from "../util/tolerateError";
 import type { ProcessorService } from "./ProcessorService";
 import type { QueueService } from "./QueueService";
-import { tolerateError } from "../util/tolerateError";
-import { TaskDuplicateError } from "../error/TaskDuplicateError";
 
 export class ConsumerService {
   constructor(
@@ -41,11 +41,9 @@ export class ConsumerService {
       { procedure: "ConsumerService.consumeRecord.task-process", task, record },
       async () => this.processorService.process(task.value),
     );
-    
-    if (processingResult.isErr()) {
-      const internalError = processingResult.error.internal;
 
-      if (internalError instanceof TaskDuplicateError) {
+    if (processingResult.isErr()) {
+      if (processingResult.error.internal instanceof TaskDuplicateError) {
         this.queueService.removeRecordFromQueue(record);
         return false;
       }
