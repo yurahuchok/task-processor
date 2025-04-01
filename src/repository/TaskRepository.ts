@@ -41,7 +41,9 @@ export class TaskRepository {
   }
 
   async putFailureRecord(task: Task, error: unknown) {
-    const latestFailureRecord = await this.getLatestFailureRecord(task.id);
+    const queryResult = await this.getLatestFailureRecord(task.id);
+    const failureCount =
+      Number.parseInt(queryResult.Items?.pop()?.SK.S ?? "0") + 1;
 
     return this.dynamo.send(
       new PutItemCommand({
@@ -49,7 +51,7 @@ export class TaskRepository {
         Item: {
           PK: { S: `TASK#${task.id}` },
           SK: {
-            S: `STATUS#FAILURE#${String(latestFailureRecord.Items?.[0].SK.S ?? 1).padStart(6, "0")}`,
+            S: `STATUS#FAILURE#${String(failureCount).padStart(6, "0")}`,
           },
           payload: { S: JSON.stringify(task.payload) },
           error: { S: JSON.stringify(serializeError(error, { maxDepth: 10 })) },
@@ -58,8 +60,9 @@ export class TaskRepository {
       }),
     );
   }
+
   async getLatestFailureRecord(id: string) {
-    return this.dynamo.send(
+    return await this.dynamo.send(
       new QueryCommand({
         TableName: this.tableName,
         KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
