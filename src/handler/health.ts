@@ -1,8 +1,13 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import type {
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
+} from "aws-lambda";
 import { inject } from "../bootstrap/inject";
 import { handleError } from "../util/handleError";
 
-export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
+export async function handler(
+  event: APIGatewayProxyEventV2,
+): Promise<APIGatewayProxyResultV2> {
   const result = await handleError(
     { procedure: "handler.health", event },
     async () => {

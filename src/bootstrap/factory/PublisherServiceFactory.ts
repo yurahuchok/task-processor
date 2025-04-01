@@ -4,17 +4,11 @@ import { QueueServiceFactory } from "./QueueServiceFactory";
 export class PublisherServiceFactory {
   static injectionToken = "PublisherServiceFactory" as const;
 
-  static inject = [
-    QueueServiceFactory.injectionToken,
-  ] as const;
+  static inject = [QueueServiceFactory.injectionToken] as const;
 
-  constructor(
-    protected queueServiceFactory: QueueServiceFactory,
-  ) {}
+  constructor(protected queueServiceFactory: QueueServiceFactory) {}
 
   async make() {
-    return new PublisherService(
-      await this.queueServiceFactory.make(),
-    );
+    return new PublisherService(await this.queueServiceFactory.make());
   }
 }

@@ -1,4 +1,4 @@
-import { Logger } from "winston";
+import type { Logger } from "winston";
 import { AuthorizationError } from "../error/AuthorizationError";
 import { BadRequestError } from "../error/BadRequestError";
 import { ConflictError } from "../error/ConflictError";
@@ -10,10 +10,12 @@ import { TaskParsingError } from "../error/TaskParsingError";
 import { TaskProcessingError } from "../error/TaskProcessingError";
 import { ValidationError } from "../error/ValidationError";
 
-export type Meta = string | {
-  procedure: string;
-  [key: string]: unknown;
-}
+export type Meta =
+  | string
+  | {
+      procedure: string;
+      [key: string]: unknown;
+    };
 
 export function logError(error: unknown, logger: Logger, meta?: Meta) {
   switch (true) {

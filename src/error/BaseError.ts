@@ -1,8 +1,11 @@
-export abstract class BaseError<TType extends string, TCode extends number> extends Error {
-  readonly abstract _type: TType;
+export abstract class BaseError<
+  TType extends string,
+  TCode extends number,
+> extends Error {
+  abstract readonly _type: TType;
 
-  readonly abstract _statusCode: TCode;
-  
+  abstract readonly _statusCode: TCode;
+
   constructor(
     message?: string,
     public readonly internal?: unknown,

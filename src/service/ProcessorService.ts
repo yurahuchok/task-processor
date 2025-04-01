@@ -1,8 +1,8 @@
-import { TaskRepository } from "../repository/TaskRepository";
-import { Task } from "../type/Task";
-import { getRandomNumber } from "../util/getRandomNumber";
 import { TaskDuplicateError } from "../error/TaskDuplicateError";
 import { TaskProcessingError } from "../error/TaskProcessingError";
+import type { TaskRepository } from "../repository/TaskRepository";
+import type { Task } from "../type/Task";
+import { getRandomNumber } from "../util/getRandomNumber";
 
 export class ProcessorService {
   constructor(protected repository: TaskRepository) {}
@@ -21,12 +21,12 @@ export class ProcessorService {
     // Simulating processing.
     const time = getRandomNumber(100, 200);
     const successRate = 0.3;
-    
+
     const isSuccess = await new Promise<boolean>((resolve) => {
       setTimeout(() => resolve(Math.random() > successRate), time);
     });
 
-    if (isSuccess) {  
+    if (isSuccess) {
       await this.repository.create(task, "SUCCESS");
       return;
     }

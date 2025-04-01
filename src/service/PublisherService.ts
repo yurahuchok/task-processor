@@ -1,5 +1,5 @@
-import { Task } from "../type/Task";
-import { QueueService } from "./QueueService";
+import type { Task } from "../type/Task";
+import type { QueueService } from "./QueueService";
 
 export class PublisherService {
   constructor(protected queueService: QueueService) {}

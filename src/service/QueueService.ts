@@ -1,11 +1,18 @@
-import { Task } from "../type/Task";
-import { ChangeMessageVisibilityCommand, DeleteMessageCommand, SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
+import {
+  ChangeMessageVisibilityCommand,
+  DeleteMessageCommand,
+  type SQSClient,
+  SendMessageCommand,
+} from "@aws-sdk/client-sqs";
 import type { SQSRecord } from "aws-lambda";
 import { TaskParsingError } from "../error/TaskParsingError";
-
+import { Task } from "../type/Task";
 
 export class QueueService {
-  constructor(protected sqsClient: SQSClient, protected queueUrl: string) {}
+  constructor(
+    protected sqsClient: SQSClient,
+    protected queueUrl: string,
+  ) {}
 
   async publishTask(task: Task) {
     await this.sqsClient.send(
@@ -14,7 +21,7 @@ export class QueueService {
         MessageBody: JSON.stringify(task),
         MessageDeduplicationId: task.id,
       }),
-    )
+    );
   }
 
   parseTaskFromRecord(record: SQSRecord) {
@@ -31,9 +38,8 @@ export class QueueService {
         QueueUrl: this.queueUrl,
         ReceiptHandle: record.receiptHandle,
         VisibilityTimeout:
-          10 +
-          2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
-      })
+          10 + 2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
+      }),
     );
   }
 
@@ -42,7 +48,7 @@ export class QueueService {
       new DeleteMessageCommand({
         QueueUrl: this.queueUrl,
         ReceiptHandle: record.receiptHandle,
-      })
+      }),
     );
   }
 }

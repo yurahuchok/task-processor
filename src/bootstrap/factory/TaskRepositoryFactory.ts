@@ -1,7 +1,7 @@
 import { TaskRepository } from "../../repository/TaskRepository";
-import { DynamoDBClientFactory } from "./DynamoDBClientFactory";
-import { ConfigFactory } from "./ConfigFactory";
 import { BaseFactory } from "./BaseFactory";
+import { ConfigFactory } from "./ConfigFactory";
+import { DynamoDBClientFactory } from "./DynamoDBClientFactory";
 
 export class TaskRepositoryFactory extends BaseFactory<TaskRepository> {
   static injectionToken = "TaskRepositoryFactory" as const;
@@ -19,6 +19,9 @@ export class TaskRepositoryFactory extends BaseFactory<TaskRepository> {
   }
 
   protected async _make() {
-    return new TaskRepository(await this.dynamoDbClientFactory.make(), (await this.configFactory.make()).TABLE_NAME);
+    return new TaskRepository(
+      await this.dynamoDbClientFactory.make(),
+      (await this.configFactory.make()).TABLE_NAME,
+    );
   }
 }

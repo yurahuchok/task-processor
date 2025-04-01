@@ -1,20 +1,18 @@
-import { Logger } from "winston";
-import * as winston from "winston";
 import { serializeError } from "serialize-error";
-import { ConfigFactory } from "./ConfigFactory";
+import type { Logger } from "winston";
+import * as winston from "winston";
 import { BaseFactory } from "./BaseFactory";
+import { ConfigFactory } from "./ConfigFactory";
 
 export class LoggerFactory extends BaseFactory<Logger> {
   static injectionToken = "LoggerFactory" as const;
 
-  static inject = [
-    ConfigFactory.injectionToken,
-  ] as const;
+  static inject = [ConfigFactory.injectionToken] as const;
 
   constructor(protected configFactory: ConfigFactory) {
     super();
   }
-  
+
   protected async _make() {
     const config = await this.configFactory.make();
 
@@ -27,7 +25,7 @@ export class LoggerFactory extends BaseFactory<Logger> {
           }
           return info;
         })(),
-        winston.format.json()
+        winston.format.json(),
       ),
       transports: [new winston.transports.Console()],
       defaultMeta: { application: `task-processor-${config.NODE_ENV}` },

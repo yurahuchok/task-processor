@@ -1,4 +1,4 @@
-import { type ZodError } from "zod";
+import type { ZodError } from "zod";
 import { BaseError } from "./BaseError";
 
 export class ValidationError extends BaseError<"ValidationError", 400> {
