@@ -42,8 +42,11 @@ export class TaskRepository {
 
   async putFailureRecord(task: Task, error: unknown) {
     const queryResult = await this.getLatestFailureRecord(task.id);
+
+    // TODO. Hacky/ugly/unsafe parsing. Refactor.
     const failureCount =
-      Number.parseInt(queryResult.Items?.pop()?.SK.S ?? "0") + 1;
+      Number.parseInt(queryResult.Items?.pop()?.SK.S?.split("#").pop() ?? "0") +
+      1;
 
     return this.dynamo.send(
       new PutItemCommand({
