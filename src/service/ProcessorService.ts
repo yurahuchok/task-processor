@@ -3,7 +3,6 @@ import { TaskProcessingError } from "../error/TaskProcessingError";
 import { TaskResultStorageError } from "../error/TaskResultStorageError";
 import type { TaskRepository } from "../repository/TaskRepository";
 import type { Task } from "../type/Task";
-import { getRandomNumber } from "../util/getRandomNumber";
 import { tolerateError } from "../util/tolerateError";
 
 export class ProcessorService {
@@ -13,7 +12,7 @@ export class ProcessorService {
     const result = await tolerateError(
       { procedure: "ProcessorService.lock", task },
       async () => {
-        await this.repository.create(task, "LOCKED");
+        await this.repository.putLockRecord(task.id);
       },
     );
 
@@ -29,7 +28,7 @@ export class ProcessorService {
     const result = await tolerateError(
       { procedure: "ProcessorService.unlock", task },
       async () => {
-        await this.repository.delete(task.id, "LOCKED");
+        await this.repository.deleteLockRecord(task.id);
       },
     );
 
@@ -45,7 +44,7 @@ export class ProcessorService {
     const result = await tolerateError(
       { procedure: "ProcessorService.storeSuccess", task },
       async () => {
-        await this.repository.create(task, "SUCCESS");
+        await this.repository.putSuccessRecord(task);
       },
     );
 
@@ -57,23 +56,56 @@ export class ProcessorService {
     }
   }
 
+  protected async storeFailure(task: Task, error: unknown) {
+    const result = await tolerateError(
+      { procedure: "ProcessorService.storeFailure", task, error },
+      async () => {
+        await this.repository.putFailureRecord(task, error);
+      },
+    );
+
+    if (result.isErr()) {
+      throw new TaskResultStorageError(
+        "Failed to store task as failed.",
+        result.error,
+      );
+    }
+  }
+
+  protected async simulateProcessing(task: Task) {
+    const failureChance = task.payload.simulation?.failureChance ?? 0.3;
+    const executionTime = Math.min(
+      Math.max(task.payload.simulation?.executionTime ?? 0, 0),
+      1000,
+    );
+
+    const isSuccess = await new Promise<boolean>((resolve) => {
+      setTimeout(() => resolve(Math.random() > failureChance), executionTime);
+    });
+
+    if (!isSuccess) {
+      throw Error("Simulated failure.");
+    }
+  }
+
   async process(task: Task) {
     await this.lock(task);
 
-    // Simulating processing.
-    const time = getRandomNumber(100, 200);
-    const failureRate = 0.3;
+    try {
+      await this.simulateProcessing(task);
+    } catch (error: unknown) {
+      await this.unlock(task);
 
-    const isSuccess = await new Promise<boolean>((resolve) => {
-      setTimeout(() => resolve(Math.random() > failureRate), time);
-    });
+      const taskProcessingError = new TaskProcessingError(
+        "Failed to process task.",
+        error,
+      );
+      await this.storeFailure(task, taskProcessingError);
 
-    if (isSuccess) {
-      await this.storeSuccess(task);
-      return;
+      throw taskProcessingError;
     }
 
-    await this.unlock(task);
-    throw new TaskProcessingError("Failed to process task.");
+    await this.storeSuccess(task);
+    return;
   }
 }
