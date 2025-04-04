@@ -27,9 +27,8 @@ export class ConsumerService {
   }
 
   async consumeRecord(record: SQSRecord) {
-    const task = await tolerateError(
-      { procedure: "ConsumerService.consumeRecord.task-parse", record },
-      async () => this.queueService.parseTaskFromRecord(record),
+    const task = await tolerateError({ procedure: "ConsumerService.consumeRecord.task-parse", record }, async () =>
+      this.queueService.parseTaskFromRecord(record),
     );
 
     if (task.isErr()) {

@@ -3,9 +3,8 @@ import { inject } from "../bootstrap/inject";
 import { tolerateAllErrors } from "../util/tolerateAllErrors";
 
 export async function handler(event: SQSEvent): Promise<SQSBatchResponse> {
-  const result = await tolerateAllErrors(
-    { procedure: "handler.consume", event },
-    async () => (await inject().ConsumerService()).consumeEvent(event),
+  const result = await tolerateAllErrors({ procedure: "handler.consume", event }, async () =>
+    (await inject().ConsumerService()).consumeEvent(event),
   );
 
   if (result.isErr()) {

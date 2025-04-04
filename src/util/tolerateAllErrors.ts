@@ -12,10 +12,7 @@ import { UnknownError } from "../error/UnknownError";
 import { ValidationError } from "../error/ValidationError";
 import { injectLoggerOrThrow } from "./injectLoggerOrThrow";
 
-export function tolerateAllErrors<T>(
-  meta: { procedure: string; [key: string]: unknown },
-  fn: () => Promise<T>,
-) {
+export function tolerateAllErrors<T>(meta: { procedure: string; [key: string]: unknown }, fn: () => Promise<T>) {
   return fromPromise(fn(), async (error: unknown) => {
     const logger = await injectLoggerOrThrow();
 
@@ -37,10 +34,7 @@ export function tolerateAllErrors<T>(
         logger.error("tolerateAllErrors: Error occurred.", { error, meta });
         return error;
       default:
-        logger.error("tolerateAllErrors: Unexpected Error occurred.", {
-          error,
-          meta,
-        });
+        logger.error("tolerateAllErrors: Unexpected Error occurred.", { error, meta });
         return new UnknownError("Unexpected Error occurred.", error);
     }
   }).mapErr((error) => error);

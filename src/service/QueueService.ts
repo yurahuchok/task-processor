@@ -45,8 +45,7 @@ export class QueueService {
       new ChangeMessageVisibilityCommand({
         QueueUrl: this.queueUrl,
         ReceiptHandle: record.receiptHandle,
-        VisibilityTimeout:
-          10 + 2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
+        VisibilityTimeout: 10 + 2 ** Number.parseInt(record.attributes.ApproximateReceiveCount),
       }),
     );
   }

@@ -1,9 +1,4 @@
-import {
-  DeleteItemCommand,
-  type DynamoDBClient,
-  PutItemCommand,
-  QueryCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, type DynamoDBClient, PutItemCommand, QueryCommand } from "@aws-sdk/client-dynamodb";
 import { serializeError } from "serialize-error";
 import type { Task } from "../type/Task";
 
@@ -22,8 +17,7 @@ export class TaskRepository {
           SK: { S: "STATUS#LOCKED" },
           ts: { S: new Date().toISOString() },
         },
-        ConditionExpression:
-          "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+        ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
       }),
     );
   }
@@ -44,9 +38,7 @@ export class TaskRepository {
     const queryResult = await this.getLatestFailureRecord(task.id);
 
     // TODO. Hacky/ugly/unsafe parsing. Refactor.
-    const failureCount =
-      Number.parseInt(queryResult.Items?.pop()?.SK.S?.split("#").pop() ?? "0") +
-      1;
+    const failureCount = Number.parseInt(queryResult.Items?.pop()?.SK.S?.split("#").pop() ?? "0") + 1;
 
     return this.dynamo.send(
       new PutItemCommand({
@@ -103,8 +95,7 @@ export class TaskRepository {
           payload: { S: JSON.stringify(task.payload) },
           ts: { S: new Date().toISOString() },
         },
-        ConditionExpression:
-          "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+        ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
       }),
     );
   }
