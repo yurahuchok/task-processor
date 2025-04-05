@@ -3,48 +3,39 @@ import { TaskProcessingError } from "../error/TaskProcessingError";
 import { TaskResultStorageError } from "../error/TaskResultStorageError";
 import type { TaskRepository } from "../repository/TaskRepository";
 import type { Task } from "../type/Task";
-import { tolerateError } from "../util/tolerateError";
 
 export class ProcessorService {
   constructor(protected repository: TaskRepository) {}
 
   protected async lock(task: Task) {
-    const result = await tolerateError({ procedure: "ProcessorService.lock", task }, async () => {
-      await this.repository.putLockRecord(task.id);
-    });
-
-    if (result.isErr()) {
-      throw new TaskDuplicateError("Task ID already exists in the database. Cannot process.", result.error);
+    try {
+      return this.repository.putLockRecord(task.id);
+    } catch (error: unknown) {
+      throw new TaskDuplicateError("Task ID already exists in the database. Cannot process.", error);
     }
   }
 
   protected async unlock(task: Task) {
-    const result = await tolerateError({ procedure: "ProcessorService.unlock", task }, async () => {
-      await this.repository.deleteLockRecord(task.id);
-    });
-
-    if (result.isErr()) {
-      throw new TaskResultStorageError("Failed to unlock task for further processing.", result.error);
+    try {
+      return this.repository.deleteLockRecord(task.id);
+    } catch (error: unknown) {
+      throw new TaskResultStorageError("Failed to unlock task for further processing.", error);
     }
   }
 
   protected async storeSuccess(task: Task) {
-    const result = await tolerateError({ procedure: "ProcessorService.storeSuccess", task }, async () => {
-      await this.repository.putSuccessRecord(task);
-    });
-
-    if (result.isErr()) {
-      throw new TaskResultStorageError("Failed to store task as successful.", result.error);
+    try {
+      return this.repository.putSuccessRecord(task);
+    } catch (error: unknown) {
+      throw new TaskResultStorageError("Failed to store task as successful.", error);
     }
   }
 
-  protected async storeFailure(task: Task, error: unknown) {
-    const result = await tolerateError({ procedure: "ProcessorService.storeFailure", task, error }, async () => {
-      await this.repository.putFailureRecord(task, error);
-    });
-
-    if (result.isErr()) {
-      throw new TaskResultStorageError("Failed to store task as failed.", result.error);
+  protected async storeFailure(task: Task, failureCauseError: unknown) {
+    try {
+      return this.repository.putFailureRecord(task, failureCauseError);
+    } catch (storageError: unknown) {
+      throw new TaskResultStorageError("Failed to store task as failed.", { storageError, failureCauseError });
     }
   }
 
