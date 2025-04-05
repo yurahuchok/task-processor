@@ -1,6 +1,7 @@
 import { createInjector } from "typed-inject";
 import { ConfigFactory } from "./factory/ConfigFactory";
 import { ConsumerServiceFactory } from "./factory/ConsumerServiceFactory";
+import { DLQConsumerServiceFactory } from "./factory/DLQConsumerServiceFactory";
 import { DynamoDBClientFactory } from "./factory/DynamoDBClientFactory";
 import { LoggerFactory } from "./factory/LoggerFactory";
 import { ProcessorServiceFactory } from "./factory/ProcessorServiceFactory";
@@ -18,7 +19,8 @@ const injector = createInjector()
   .provideClass(QueueServiceFactory.injectionToken, QueueServiceFactory)
   .provideClass(ProcessorServiceFactory.injectionToken, ProcessorServiceFactory)
   .provideClass(PublisherServiceFactory.injectionToken, PublisherServiceFactory)
-  .provideClass(ConsumerServiceFactory.injectionToken, ConsumerServiceFactory);
+  .provideClass(ConsumerServiceFactory.injectionToken, ConsumerServiceFactory)
+  .provideClass(DLQConsumerServiceFactory.injectionToken, DLQConsumerServiceFactory);
 
 export function inject() {
   return {
@@ -26,5 +28,6 @@ export function inject() {
     Logger: () => injector.resolve("LoggerFactory").make(),
     PublisherService: () => injector.resolve("PublisherServiceFactory").make(),
     ConsumerService: () => injector.resolve("ConsumerServiceFactory").make(),
+    DLQConsumerService: () => injector.resolve("DLQConsumerServiceFactory").make(),
   };
 }

@@ -41,3 +41,12 @@ functions:
   consume:
     handler: src/handler/consume.handler
     timeout: 10 # Timeout for the "consumer" lambda. Also used as default visibility timeout for the queue * 6.
+  consumeDLQ:
+    handler: src/handler/consumeDLQ.handler
+    events:
+      - sqs:
+          arn:
+            - ${construct:q-tasks.dlqArn}
+          batchSize: 5
+          maxConcurrency: 10
+    timeout: 10
