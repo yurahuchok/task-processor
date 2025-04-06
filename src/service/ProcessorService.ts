@@ -42,7 +42,7 @@ export class ProcessorService {
   protected async simulateProcessing(task: Task) {
     const failureChance = task.payload.simulation?.failureChance ?? 0.3;
     const executionTime = Math.min(Math.max(task.payload.simulation?.executionTime ?? 0, 0), 1000);
-    
+
     const isSuccess = await new Promise<boolean>((resolve) => {
       setTimeout(() => resolve(Math.random() > failureChance), executionTime);
     });
