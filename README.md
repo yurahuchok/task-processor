@@ -1,8 +1,8 @@
-# ⚙️ Task Processor
+# Task Processor
 
 This project implements a fault-tolerant, event-driven backend system using AWS services. Tasks are submitted via an HTTP API and processed asynchronously using AWS Lambda and SQS, with retry logic and dead-letter queue (DLQ) support.
 
-## Architecture
+## 🏛️ Architecture
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/a86ed6e7-4db5-4e9b-8a37-176a69468a2f" width="500">
@@ -10,22 +10,21 @@ This project implements a fault-tolerant, event-driven backend system using AWS 
 
 ### Implementation Decisions
 - Exponential backoff strategy for failed tasks is achieved by changing the Visibility Timout of failed messages, using their current ApproximateReceiveCount value.
-- Handling deduplication by Task ID only at the Consumer level. Publisher always recieves a 201, regardless if ID is a duplicate.
+- Handling deduplication by Task ID only at the Consumer level. Publisher always recieves a 201, regardless if Task ID is a duplicate.
 - Concurrency and duplication issues are solved by a mutex mechanism using DynamoDB.
 
-## Task Publishing API
+## 📥 Task Publishing API
 
-### 🔗 Endpoint
+### Endpoint
 
-**POST**  
-[https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish](https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish)
+**POST** [https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish](https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish)
 
 This endpoint accepts task publishing requests and enqueues them for asynchronous processing.
 
-### 📪 Postman Collection 
+### Postman Collection 
 [https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900](https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900)
 
-## Request Body Schema
+## 📋 Request Body Schema
 
 The request body must be a JSON object that defines the `Task` to be processed.
 
@@ -46,9 +45,9 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 | `executionTime`  | `number` | ❌ No     | Simulated execution time in milliseconds. Must be between `0` and `1000`. |
 | `failureChance`  | `number` | ❌ No     | Probability of failure (between `0` and `1`). Use to simulate random task processing failures. |
 
-## Example Payloads
+## 🚛 Example Payloads
 
-### ✅ Basic Task
+### Basic Task
 ```json
 {
   "id": "task-001",
@@ -56,7 +55,7 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 }
 ```
 
-### ✅ Basic Task with payload
+### Basic Task with payload
 ```json
 {
   "id": "task-001",
@@ -66,7 +65,7 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 }
 ```
 
-### ✅ Task with Simulation Settings
+### Task with Simulation Settings
 ```
 {
   "id": "task-002",
@@ -79,19 +78,19 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 }
 ```
 
-## Deployment Instructions
+## 🚀 Deployment Instructions
 
-### 1. 📦 Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. 🔐 Get a Serverless Access Key
+### 2. Get a Serverless Access Key
 
 Create an account on Serverless Dashboard and get your Access Key.
 
-### 3. 🛠️ Configure Environment
+### 3. Configure Environment
 
 Create a .env file at the root of the project:
 ```
@@ -103,13 +102,13 @@ Then, edit .env and paste your Serverless Access Key:
 SERVERLESS_ACCESS_KEY=your-access-key-here
 ```
 
-### 4. 🚀 Deploy the Stack
+### 4. Deploy the Stack
 ```
 npm run dev:deploy
 ```
 This will deploy your API, SQS queue, DLQ, and all related Lambda functions to AWS (dev stage).
 
-## References
+## 💡 References
 
 ### Neverthrow
 - [supermacro/neverthrow](https://github.com/supermacro/neverthrow)
