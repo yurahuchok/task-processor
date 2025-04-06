@@ -18,12 +18,12 @@ This project implements a fault-tolerant, event-driven backend system using AWS 
 ### 🔗 Endpoint
 
 **POST**  
-`https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish`
+[https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish](https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish)
 
 This endpoint accepts task publishing requests and enqueues them for asynchronous processing.
 
 ### 📪 Postman Collection 
-`https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900`
+[https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900](https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900)
 
 ## Request Body Schema
 
