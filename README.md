@@ -10,7 +10,7 @@ This project implements a fault-tolerant, event-driven backend system using AWS 
 
 ### Implementation Decisions
 - Exponential backoff strategy for failed tasks is achieved by changing the Visibility Timout of failed messages, using their current ApproximateReceiveCount value.
-- FIFO queue can be used to have deduplication by Task ID, but it's too much overhead for this use case IMO. So instead, opting for a simple queue and handling duplication only at the Consumer level. Therefore, Publisher always recieves a 201, regardless if ID is a duplicate.
+- Handling deduplication by Task ID only at the Consumer level. Publisher always recieves a 201, regardless if ID is a duplicate.
 - Concurrency and duplication issues are solved by a mutex mechanism using DynamoDB.
 
 ## Task Publishing API
