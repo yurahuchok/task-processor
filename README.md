@@ -1,10 +1,14 @@
-# 📦 Task Processor API
+# ⚙️ Task Processor
 
 This project implements a fault-tolerant, event-driven backend system using AWS services. Tasks are submitted via an HTTP API and processed asynchronously using AWS Lambda and SQS, with retry logic and dead-letter queue (DLQ) support.
 
-![architecture](https://github.com/user-attachments/assets/64de3217-2e50-4f88-805b-29c562b30514)
+## Architecture
 
-## 🚀 Task Publishing API
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0ccfdfea-8f17-4792-b9e5-cc00384ea9e6" width="500">
+</p>
+
+## Task Publishing API
 
 ### 🔗 Endpoint
 
@@ -16,7 +20,7 @@ This endpoint accepts task publishing requests and enqueues them for asynchronou
 ### 📪 Postman Collection 
 `https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900`
 
-## 📥 Request Body Schema
+## Request Body Schema
 
 The request body must be a JSON object that defines the `Task` to be processed.
 
@@ -37,7 +41,7 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 | `executionTime`  | `number` | ❌ No     | Simulated execution time in milliseconds. Must be between `0` and `1000`. |
 | `failureChance`  | `number` | ❌ No     | Probability of failure (between `0` and `1`). Use to simulate random task processing failures. |
 
-## 🧪 Example Payloads
+## Example Payloads
 
 ### ✅ Basic Task
 ```json
@@ -70,7 +74,7 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 }
 ```
 
-## 🚀 Deployment Instructions
+## Deployment Instructions
 
 ### 1. 📦 Install Dependencies
 
@@ -99,3 +103,11 @@ SERVERLESS_ACCESS_KEY=your-access-key-here
 npm run dev:deploy
 ```
 This will deploy your API, SQS queue, DLQ, and all related Lambda functions to AWS (dev stage).
+
+## References
+
+### Neverthrow
+
+- [supermacro/neverthrow](https://github.com/supermacro/neverthrow)
+- [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/)
+- [Robin Pokorný - Railway Oriented TypeScript](https://www.youtube.com/watch?v=AqeR-Fn75Sw`)
