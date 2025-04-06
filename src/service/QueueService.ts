@@ -5,8 +5,7 @@ import {
   SendMessageCommand,
 } from "@aws-sdk/client-sqs";
 import type { SQSRecord } from "aws-lambda";
-import { TaskParsingError } from "../error/TaskParsingError";
-import { Task } from "../type/Task";
+import type { Task } from "../type/Task";
 
 export class QueueService {
   constructor(
@@ -30,14 +29,6 @@ export class QueueService {
         MessageBody: JSON.stringify(task),
       }),
     );
-  }
-
-  parseTaskFromRecord(record: SQSRecord) {
-    const result = Task.safeParse(JSON.parse(record.body));
-    if (!result.success) {
-      throw new TaskParsingError(record, result.error);
-    }
-    return result.data;
   }
 
   increaseRetryDelayForRecord(record: SQSRecord) {

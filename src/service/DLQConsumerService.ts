@@ -1,12 +1,11 @@
 import type { SQSBatchItemFailure, SQSEvent, SQSRecord } from "aws-lambda";
 import type { Logger } from "winston";
 import type { TaskRepository } from "../repository/TaskRepository";
+import { parseTaskFromSQSRecord } from "../util/parseTaskFromSQSRecord";
 import { tolerateError } from "../util/tolerateError";
-import type { QueueService } from "./QueueService";
 
 export class DLQConsumerService {
   constructor(
-    protected queueService: QueueService,
     protected repository: TaskRepository,
     protected logger: Logger,
   ) {}
@@ -28,8 +27,10 @@ export class DLQConsumerService {
   }
 
   async consumeDLQRecord(record: SQSRecord) {
+    console.log("CONSUMING DLQ RECORD", record);
+
     const task = await tolerateError({ procedure: "ConsumerService.consumeDLQRecord.task-parse", record }, async () =>
-      this.queueService.parseTaskFromRecord(record),
+      parseTaskFromSQSRecord(record),
     );
 
     if (task.isErr()) {

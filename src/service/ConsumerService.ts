@@ -1,5 +1,6 @@
 import type { SQSBatchItemFailure, SQSEvent, SQSRecord } from "aws-lambda";
 import { TaskDuplicateError } from "../error/TaskDuplicateError";
+import { parseTaskFromSQSRecord } from "../util/parseTaskFromSQSRecord";
 import { tolerateError } from "../util/tolerateError";
 import type { ProcessorService } from "./ProcessorService";
 import type { QueueService } from "./QueueService";
@@ -28,7 +29,7 @@ export class ConsumerService {
 
   async consumeRecord(record: SQSRecord) {
     const task = await tolerateError({ procedure: "ConsumerService.consumeRecord.task-parse", record }, async () =>
-      this.queueService.parseTaskFromRecord(record),
+      parseTaskFromSQSRecord(record),
     );
 
     if (task.isErr()) {
