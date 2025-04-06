@@ -5,8 +5,13 @@ This project implements a fault-tolerant, event-driven backend system using AWS 
 ## Architecture
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/0ccfdfea-8f17-4792-b9e5-cc00384ea9e6" width="500">
+  <img src="https://github.com/user-attachments/assets/a86ed6e7-4db5-4e9b-8a37-176a69468a2f" width="500">
 </p>
+
+### Implementation Decisions
+- Exponential backoff strategy for failed tasks is achieved by changing the Visibility Timout of failed messages, using their current ApproximateReceiveCount value.
+- FIFO queue can be used to have deduplication by Task ID, but it's too much overhead for this use case IMO. So instead, opting for a simple queue and handling duplication only at the Consumer level. Therefore, Publisher always recieves a 201, regardless if ID is a duplicate.
+- Concurrency and duplication issues are solved by a mutex mechanism using DynamoDB.
 
 ## Task Publishing API
 
@@ -107,7 +112,10 @@ This will deploy your API, SQS queue, DLQ, and all related Lambda functions to A
 ## References
 
 ### Neverthrow
-
 - [supermacro/neverthrow](https://github.com/supermacro/neverthrow)
 - [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/)
 - [Robin Pokorný - Railway Oriented TypeScript](https://www.youtube.com/watch?v=AqeR-Fn75Sw`)
+
+### DynamoDB single-table design
+- [Creating a single-table design with Amazon DynamoDB](https://aws.amazon.com/blogs/compute/creating-a-single-table-design-with-amazon-dynamodb)
+- [The What, Why, and When of Single-Table Design with DynamoDB](https://www.alexdebrie.com/posts/dynamodb-single-table/)
