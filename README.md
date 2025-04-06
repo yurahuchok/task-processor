@@ -1,69 +1,70 @@
-<!--
-title: 'AWS Simple HTTP Endpoint example in NodeJS'
-description: 'This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.'
-layout: Doc
-framework: v4
-platform: AWS
-language: nodeJS
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, Inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# 📦 Task Processor API
 
-# Serverless Framework Node HTTP API on AWS
+This project implements a fault-tolerant, event-driven backend system using AWS services. Tasks are submitted via an HTTP API and processed asynchronously using AWS Lambda and SQS, with retry logic and dead-letter queue (DLQ) support.
 
-This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.
+## 🚀 Task Publishing API
 
-This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes Typescript, Mongo, DynamoDB and other examples.
+### 🔗 Endpoint
 
-## Usage
+**POST**  
+`https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish`
 
-### Deployment
+This endpoint accepts task publishing requests and enqueues them for asynchronous processing.
 
-In order to deploy the example, you need to run the following command:
+### 📪 Postman Collection 
+`https://www.postman.com/yurahuchok/workspace/task-processor/collection/30410900-e3fdb243-7680-4c2f-a4d1-151cb6bceb97?action=share&creator=30410900`
 
-```
-serverless deploy
-```
+## 📥 Request Body Schema
 
-After running deploy, you should see output similar to:
+The request body must be a JSON object that defines the `Task` to be processed.
 
-```
-Deploying "serverless-http-api" to stage "dev" (us-east-1)
+### 🔹 `Task`
 
-✔ Service deployed to stack serverless-http-api-dev (91s)
+| Field     | Type     | Required | Description |
+|-----------|----------|----------|-------------|
+| `id`      | `string` | ✅ Yes   | A unique, non-empty identifier for the task. |
+| `payload` | `object` | ✅ Yes   | Contains task-specific data and optional simulation parameters. |
+| `payload.simulation`  | `Simulation` | ❌ No     | Parameters for processing simulation. |
 
-endpoint: GET - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/
-functions:
-  hello: serverless-http-api-dev-hello (1.6 kB)
-```
+### 🔸 `Simulation`
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [HTTP API (API Gateway V2) event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api).
+This section allows simulating how the backend processes the `Task`. If omitted, default behavior is assumed.
 
-### Invocation
+| Field           | Type     | Required | Description |
+|------------------|----------|----------|-------------|
+| `executionTime`  | `number` | ❌ No     | Simulated execution time in milliseconds. Must be between `0` and `1000`. |
+| `failureChance`  | `number` | ❌ No     | Probability of failure (between `0` and `1`). Use to simulate random task processing failures. |
 
-After successful deployment, you can call the created application via HTTP:
+## 🧪 Example Payloads
 
-```
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
-
-Which should result in response similar to:
-
+### ✅ Basic Task
 ```json
-{ "message": "Go Serverless v4! Your function executed successfully!" }
+{
+  "id": "task-001",
+  "payload": {}
+}
 ```
 
-### Local development
-
-The easiest way to develop and test your function is to use the `dev` command:
-
+### ✅ Basic Task with payload
+```json
+{
+  "id": "task-001",
+  "payload": {
+    "prop-key": "prop-val"
+  }
+}
 ```
-serverless dev
+
+### ✅ Task with Simulation Settings
+```
+{
+  "id": "task-002",
+  "payload": {
+    "simulation": {
+      "executionTime": 400,
+      "failureChance": 0.3
+    }
+  }
+}
 ```
 
-This will start a local emulator of AWS Lambda and tunnel your requests to and from AWS Lambda, allowing you to interact with your function as if it were running in the cloud.
-
-Now you can invoke the function as before, but this time the function will be executed locally. Now you can develop your function locally, invoke it, and see the results immediately without having to re-deploy.
-
-When you are done developing, don't forget to run `serverless deploy` to deploy the function to the cloud.
