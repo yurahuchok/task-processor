@@ -68,3 +68,32 @@ This section allows simulating how the backend processes the `Task`. If omitted,
 }
 ```
 
+## 🚀 Deployment Instructions
+
+### 1. 📦 Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. 🔐 Get a Serverless Access Key
+
+Create an account on Serverless Dashboard and get your Access Key.
+
+### 3. 🛠️ Configure Environment
+
+Create a .env file at the root of the project:
+```
+cp .env.example .env
+```
+
+Then, edit .env and paste your Serverless Access Key:
+```
+SERVERLESS_ACCESS_KEY=your-access-key-here
+```
+
+### 4. 🚀 Deploy the Stack
+```
+npm run dev:deploy
+```
+This will deploy your API, SQS queue, DLQ, and all related Lambda functions to AWS (dev stage).
