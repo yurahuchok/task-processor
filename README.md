@@ -118,3 +118,6 @@ This will deploy your API, SQS queue, DLQ, and all related Lambda functions to A
 ### DynamoDB single-table design
 - [Creating a single-table design with Amazon DynamoDB](https://aws.amazon.com/blogs/compute/creating-a-single-table-design-with-amazon-dynamodb)
 - [The What, Why, and When of Single-Table Design with DynamoDB](https://www.alexdebrie.com/posts/dynamodb-single-table/)
+
+### Srictly typed Service Container and Dependency Injection
+- [nicojs/typed-inject](https://github.com/nicojs/typed-inject)
