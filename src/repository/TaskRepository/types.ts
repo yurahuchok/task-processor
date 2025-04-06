@@ -19,7 +19,7 @@ const CompositeFailureCount = z.preprocess((val) => {
   if (typeof val !== "string") {
     return undefined;
   }
-  return val.match(/STATUS#([^.#]+)/)?.[1];
+  return val.match(/^STATUS#FAILURE#(\d+)$/)?.[1];
 }, z.coerce.number().min(1));
 
 export const LockRecord = z.object({

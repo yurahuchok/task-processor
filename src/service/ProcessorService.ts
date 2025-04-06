@@ -9,7 +9,7 @@ export class ProcessorService {
 
   protected async lock(task: Task) {
     try {
-      return this.repository.putLockRecord(task.id);
+      await this.repository.putLockRecord(task.id);
     } catch (error: unknown) {
       throw new TaskDuplicateError("Task ID already exists in the database. Cannot process.", error);
     }
@@ -17,7 +17,7 @@ export class ProcessorService {
 
   protected async unlock(task: Task) {
     try {
-      return this.repository.deleteLockRecord(task.id);
+      await this.repository.deleteLockRecord(task.id);
     } catch (error: unknown) {
       throw new TaskResultStorageError("Failed to unlock task for further processing.", error);
     }
@@ -25,7 +25,7 @@ export class ProcessorService {
 
   protected async storeSuccess(task: Task) {
     try {
-      return this.repository.putSuccessRecord(task);
+      await this.repository.putSuccessRecord(task);
     } catch (error: unknown) {
       throw new TaskResultStorageError("Failed to store task as successful.", error);
     }
@@ -33,7 +33,7 @@ export class ProcessorService {
 
   protected async storeFailure(task: Task, failureCauseError: unknown) {
     try {
-      return this.repository.putFailureRecord(task, failureCauseError);
+      await this.repository.putFailureRecord(task, failureCauseError);
     } catch (storageError: unknown) {
       throw new TaskResultStorageError("Failed to store task as failed.", { storageError, failureCauseError });
     }
@@ -42,7 +42,7 @@ export class ProcessorService {
   protected async simulateProcessing(task: Task) {
     const failureChance = task.payload.simulation?.failureChance ?? 0.3;
     const executionTime = Math.min(Math.max(task.payload.simulation?.executionTime ?? 0, 0), 1000);
-
+    
     const isSuccess = await new Promise<boolean>((resolve) => {
       setTimeout(() => resolve(Math.random() > failureChance), executionTime);
     });

@@ -32,22 +32,22 @@ export class ConsumerService {
     );
 
     if (task.isErr()) {
-      this.queueService.removeRecordFromQueue(record);
+      await this.queueService.removeRecordFromQueue(record);
       return false;
     }
 
     const processingResult = await tolerateError(
       { procedure: "ConsumerService.consumeRecord.task-process", task, record },
-      async () => this.processorService.process(task.value),
+      () => this.processorService.process(task.value),
     );
 
     if (processingResult.isErr()) {
       if (processingResult.error.internal instanceof TaskDuplicateError) {
-        this.queueService.removeRecordFromQueue(record);
+        await this.queueService.removeRecordFromQueue(record);
         return false;
       }
 
-      this.queueService.increaseRetryDelayForRecord(record);
+      await this.queueService.increaseRetryDelayForRecord(record);
       return false;
     }
 

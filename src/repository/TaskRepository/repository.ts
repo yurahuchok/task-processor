@@ -36,7 +36,8 @@ export class TaskRepository {
   }
 
   async putFailureRecord(task: Task, error: unknown) {
-    const failureCount = (await this.getLatestFailureRecord(task.id))?.failureCount ?? 0;
+    const currentFailureRecord = await this.getLatestFailureRecord(task.id);
+    const currentFailureCount = currentFailureRecord ? currentFailureRecord.failureCount : 0;
 
     await this.dynamo.send(
       new PutItemCommand({
@@ -44,7 +45,7 @@ export class TaskRepository {
         Item: {
           PK: { S: `TASK#${task.id}` },
           SK: {
-            S: `STATUS#FAILURE#${String(failureCount + 1).padStart(6, "0")}`,
+            S: `STATUS#FAILURE#${String(currentFailureCount + 1).padStart(6, "0")}`,
           },
           payload: { S: JSON.stringify(task.payload) },
           error: { S: JSON.stringify(serializeError(error, { maxDepth: 10 })) },
@@ -75,35 +76,12 @@ export class TaskRepository {
 
     return FailureRecord.parse({
       id: record?.PK.S,
-      payload: record?.payload.S,
-      status: "FAILURE",
-      failureCount: record?.S,
+      payload: JSON.parse(record?.payload.S ?? "{}"),
+      status: record?.SK.S,
+      failureCount: record?.SK.S,
       error: JSON.parse(record?.error.S ?? "{}"),
+      ts: record?.ts.S,
     });
-  }
-
-  async getAllFailureRecords(id: string) {
-    const result = await this.dynamo.send(
-      new QueryCommand({
-        TableName: this.tableName,
-        KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
-        ExpressionAttributeValues: {
-          ":pk": { S: `TASK#${id}` },
-          ":sk": { S: "STATUS#FAILURE#" },
-        },
-        ScanIndexForward: true,
-      }),
-    );
-
-    return result.Items?.map((item) =>
-      FailureRecord.parse({
-        id: item.PK.S,
-        payload: item.payload.S,
-        status: "FAILURE",
-        failureCount: item.S,
-        error: JSON.parse(item.error.S ?? "{}"),
-      }),
-    );
   }
 
   async putSuccessRecord(task: Task) {
