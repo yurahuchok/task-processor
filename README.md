@@ -2,6 +2,8 @@
 
 This project implements a fault-tolerant, event-driven backend system using AWS services. Tasks are submitted via an HTTP API and processed asynchronously using AWS Lambda and SQS, with retry logic and dead-letter queue (DLQ) support.
 
+![architecture](https://github.com/user-attachments/assets/64de3217-2e50-4f88-805b-29c562b30514)
+
 ## 🚀 Task Publishing API
 
 ### 🔗 Endpoint
