@@ -17,7 +17,7 @@ This project implements a fault-tolerant, event-driven backend system using AWS 
 
 ### Endpoint
 
-**POST** [https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish](https://kz5cyi58hi.execute-api.eu-central-1.amazonaws.com/publish)
+**POST** [https://kzfk1w7lu8.execute-api.eu-central-1.amazonaws.com/publish](https://kzfk1w7lu8.execute-api.eu-central-1.amazonaws.com/publish)
 
 This endpoint accepts task publishing requests and enqueues them for asynchronous processing.
 
